@@ -26,7 +26,8 @@ module adc_correction_engine(
     input sys_clk_i,
 	 input reset_i
     );
-reg [31:0] config_reg[39:0]={};
+wire [31:0] config_reg[39:0]={};
+wire [31:0] coeff_reg[9:0];
 wire sum_en, sum_rst;
 wire [31:0] smc_input_data;
 wire [31:0] x_i_multiplier_d;
@@ -46,5 +47,8 @@ smc_float_adder smc_float_32i_32i_32o_adder(.x_i_porty(adder_32i_1), .y_i_porty(
 delay_sum_block delay_sum_block(.x_i_porty(delay_32i), .sum_en(sum_en), .sum_rst(sum_rst), .srdyi_i(srdyo_add_o), .GlobalReset(reset_i), .clk(sys_clk_i), .z_o_portx(delay_32o));
 
 control control(.srdyi(srdyi), .srdyo(srdyo), .sum_en(sum_en), .sum_rst(sum_rst), .clk(sys_clk_i), .GlobalReset(reset_i), .coeff_sel(coeff_sel));
+output_reg output_reg(.data_in(delay_32o), .data_out(adc_correction_out), .srdyo(srdyo), .GlobalReset(reset_i) );
 
+coeff_comparator coeff_comparator ( .adc_count(adc_correction_in), .config_reg(config_reg), .coeff_o (coeff_reg));
+coeff_register coeff_register( .coeff_sel(coeff_sel), .coeff_reg(coeff_reg) , coeff_o(coefficient_32i));
 endmodule
